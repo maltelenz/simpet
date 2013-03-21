@@ -1,0 +1,60 @@
+World
+=====
+* World with different types of resources
+* Assume 2d world
+* Time is discrete
+* For each time step, each pet executes one instruction
+
+Resources
+=========
+* Each type of resource in the world can be gathered and converted into energy
+* Different types of resources are gathered at different rates, and converted at different rates
+* Resources regenerate
+* Types of resources:
+    Type        |   Gather speed    |   Conversion      |   Regeneration    |   Abundance
+    ---------------------------------------------------------------------------------------
+    * Wood      |   Fast            |   Slow            |   Slow            |   Medium
+    * Stone     |   Slow            |   Extra Slow      |   Extra slow      |   Large
+    * Sun       |   Medium          |   Medium          |   Instant         |   Infinite
+    * Fruit     |   Medium          |   Instant         |   Fast            |   Small
+
+Pets - Basic
+============
+* Programmable pets
+* Each "instruction" in a pet takes a certain amount of energy
+* Pets can carry a certain amount of unconverted resources
+* Instructions include:
+    * Move up/down/left/right
+    * Attack
+    * Gather resource
+    * Sleep
+    * Increase defense
+    * Increase transport speed
+    * Increase attack
+    * Increase gather speed
+    * Write reproduction storage to nearest pet
+    * Trigger offspring
+* An instruction that cannot be executed is ignored
+* Gathered resources automatically and continuously convert into energy
+
+Reproduction
+============
+* Pets mate and reproduce
+* Each pet has a "reproduction storage" that can be filled with genetic material from other pets it meets
+* A pet slowly fills up its own reproduction storage, and if it waits long enough, can produce offspring on its own
+* All copying into a reproduction storage involves a risk of scrambling (changing of instructions)
+* The more similar two partners are, the larger the risk of scrambling
+* Mating consists of exchanging a certain amount of information between pets
+* The reproduction storage consists of a list of instructions, and a mapping for each partner petx on the form
+    Number of instructions by petx -> {defense of petx, speed of petx, attack of petx}
+* Mating could happen between more than 2 pets
+* An offspring can be triggered at any point in time
+* Triggering offspring starts a gestation, the length of which depends on the length of the reproduction storage
+* A newborn starts off with a basic level of defense/attack/transport/gather, derived from but lower than its parents
+
+Attack
+======
+* Pets can attack other pets
+* Being attacked or attacking can lead to damages
+* Damages can lower or disable functionality such as transport, reproduction capabilities, resource -> energy conversion, resource gathering, ...
+
