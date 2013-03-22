@@ -29,12 +29,15 @@ STONE_GATHER_SPEED = 3
 FRUIT_GATHER_SPEED = 3
 
 # How much of each resource can a pet carry
-MAX_CARRYING_CAPACITY = 20
+MAX_CARRYING_CAPACITY = 15
 
 # Resource availability
-MAX_WOOD = 2
-MAX_STONE = 10
-MAX_FRUIT = 0.5
+MAX_WOOD = 0.5
+MAX_STONE = 1
+MAX_FRUIT = 0.05
+
+# Resource regeneration speed
+REGENERATION_SPEED = 0.0001
 
 # Rate of reproduction write scrambling
 MUTATION_RATE = 0.05

@@ -45,6 +45,8 @@ class World(object):
 
         self.time += 1
 
+        self.regenerate_resources()
+
 
     def callback(self, pet, action):
         pet_position = pet.get_pos()
@@ -161,6 +163,14 @@ class World(object):
 
     def oldest(self):
         return max([p.age for p in self.pets])
+
+    def regenerate_resources(self):
+        for x in range(self.xsize):
+            for y in range(self.ysize):
+                self.wood[x][y] += random.random() * MAX_WOOD * REGENERATION_SPEED
+                self.stone[x][y] += random.random() * MAX_STONE * REGENERATION_SPEED
+                self.fruit[x][y] += random.random() * MAX_FRUIT * REGENERATION_SPEED
+
 
     def ascii_map(self):
         res = ""
