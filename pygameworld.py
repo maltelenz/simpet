@@ -8,7 +8,7 @@ class PyGameWorld(object):
     def __init__(self, world):
         pygame.init()
 
-        (self.width, self.height) = (DRAW_FACTOR * world.xsize + 30, DRAW_FACTOR * world.ysize + 30)
+        (self.width, self.height) = (DRAW_FACTOR * world.xsize, DRAW_FACTOR * world.ysize + 30)
         self.size = (self.width, self.height)
         self.bg = (100, 100, 100)
 
@@ -29,7 +29,8 @@ class PyGameWorld(object):
                     " pets: " + str(len(world.pets)) +\
                     " avg a: " + str(world.average_age()) +\
                     " avg e: " + str(world.average_energy()) +\
-                    " avg h: " + str(world.average_health())
+                    " avg h: " + str(world.average_health()) +\
+                    " avg c: " + str(world.average_carried())
         font = pygame.font.Font(None, 25)
         text = font.render(string, 1, (255, 255, 255 ))
         

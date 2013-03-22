@@ -154,6 +154,10 @@ class World(object):
         healths = [p.health for p in self.pets]
         return round(float(sum(healths))/len(healths), 1)
 
+    def average_carried(self):
+        carried = [p.wood + p.stone + p.fruit for p in self.pets]
+        return round(float(sum(carried))/len(carried), 1)
+
 
     def oldest(self):
         return max([p.age for p in self.pets])
@@ -186,17 +190,17 @@ if __name__=="__main__":
         random.shuffle(lst)
         return lst
 
-    pets = [Pet(x*3, x*3, shuffled_instructions(), 0.1, 1, 0.1, 1) for x in range(5)]
+    pets = [Pet(x*2, x*2, shuffled_instructions(), 0.1, 1, 0.1, 1) for x in range(10)]
     w = World(30, 30, pets)
     
     w.create_canvas()
 
-    while True:
-        w.step()
+    while w.pets != []:
         w.update_canvas()
         w.handle_events()
         print("wood " + str(sum([sum(x) for x in w.wood])) +\
             " stone " + str(sum([sum(x) for x in w.stone])) +\
             " fruit " + str(sum([sum(x) for x in w.fruit])))
+        w.step()
 
-    print w.ascii_map()
+    print w.time

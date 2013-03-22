@@ -108,7 +108,7 @@ class Pet(object):
 
         elif instruction == "GatherSun":
             # Sun is everywhere and always available
-            self.energy += SUN_CONVERSION
+            self.energy = min(self.energy + SUN_CONVERSION, MAX_ENERGY)
 
         else:
             # Has to be handled by higher authority:
@@ -130,16 +130,16 @@ class Pet(object):
         self.age += 1
 
     def convert_resources(self):
-        wood_energy = max(WOOD_CONVERSION, 0)
+        wood_energy = max(min(WOOD_CONVERSION, self.wood), 0)
         self.wood -= wood_energy
 
-        stone_energy = max(STONE_CONVERSION, 0)
+        stone_energy = max(min(STONE_CONVERSION, self.stone), 0)
         self.stone -= stone_energy
 
-        fruit_energy = max(FRUIT_CONVERSION, 0)
+        fruit_energy = max(min(FRUIT_CONVERSION, self.fruit), 0)
         self.fruit -= fruit_energy
 
-        self.energy += wood_energy + stone_energy + fruit_energy
+        self.energy = min(self.energy + wood_energy + stone_energy + fruit_energy, MAX_ENERGY)
 
     def gestate(self):
         self.gestating = True
@@ -158,17 +158,17 @@ class Pet(object):
         self.posx -= 1
 
     def gather_wood(self):
-        amount_gathered = self.gather * WOOD_GATHER_SPEED
+        amount_gathered = min(self.gather * WOOD_GATHER_SPEED, max(MAX_CARRYING_CAPACITY - self.wood, 0))
         self.wood += amount_gathered
         return amount_gathered
 
     def gather_stone(self):
-        amount_gathered = self.gather * STONE_GATHER_SPEED
+        amount_gathered = min(self.gather * STONE_GATHER_SPEED, max(MAX_CARRYING_CAPACITY - self.stone, 0))
         self.stone += amount_gathered
         return amount_gathered
 
     def gather_fruit(self):
-        amount_gathered = self.gather * FRUIT_GATHER_SPEED
+        amount_gathered = min(self.gather * FRUIT_GATHER_SPEED, max(MAX_CARRYING_CAPACITY - self.fruit, 0))
         self.fruit += amount_gathered
         return amount_gathered
 
