@@ -1,6 +1,8 @@
 from settings import *
 
 import random
+import pygame
+
 
 class Pet(object):
     def __init__(self, posx, posy, program, defense, speed, attack, gather):
@@ -36,6 +38,10 @@ class Pet(object):
 
         # Current execution place
         self.ctr = 0
+
+        self.age = 0
+
+
     def init_reproduction(self):
         self.reproduction = ["EMPTY"] * random.randint(
                             len(self.program) - 10,
@@ -50,6 +56,9 @@ class Pet(object):
     def get_attack(self):
         return self.attack
 
+    def do_attack(self):
+        self.health = max(self.health + ATTACK_HEALTH_INCREASE, 1)
+
     def is_gestating(self):
         return self.gestating
 
@@ -59,7 +68,7 @@ class Pet(object):
         self.energy -= ENERGY_DRAIN
 
         # Increase health by constant healing
-        self.health += HEALING_GAIN
+        self.health = min(self.health + HEALING_GAIN, 1)
 
         # Do continuous conversion of gathered resources into energy
         self.convert_resources()
@@ -69,8 +78,16 @@ class Pet(object):
             self.gestation_left -= 1
             if self.gestation_left == 0:
                 # The offspring is ready to be born
-                callback(self, "OffspringReady")
-                self.init_reproduction()
+                if callback(self, "OffspringReady"):
+                    # Born successfully
+                    self.init_reproduction()
+        elif random.random() < SELF_WRITE_RATIO:
+            try:
+                random_pointer = random.randint(0, min(len(self.program) - 1, len(self.reproduction) - 1))
+                self.write_reproduction((random_pointer, self.program[random_pointer]))
+            except ValueError:
+                # program or reproduction is 0-length
+                pass
 
         # Execute the instruction
         instruction = self.program[self.ctr]
@@ -109,6 +126,8 @@ class Pet(object):
         self.ctr += 1
         if self.ctr == len(self.program):
             self.ctr = 0
+
+        self.age += 1
 
     def convert_resources(self):
         wood_energy = max(WOOD_CONVERSION, 0)
@@ -174,3 +193,20 @@ class Pet(object):
             self.reproduction[write[0]] = random.choice(INSTRUCTIONS)
         if "EMPTY" not in self.reproduction:
             self.gestate()
+
+    def graphic(self, size):
+        drawsize = size - 4
+        bar_health = pygame.Surface((drawsize * self.health, drawsize/3))
+        bar_energy = pygame.Surface((drawsize * min(self.energy, 1), drawsize/3))
+        bar_gest = pygame.Surface((drawsize, drawsize/3))
+
+        bar_health.fill((100, 255, 100))
+        bar_energy.fill((100, 100, 255))
+        bar_energy.fill((255, 0, 0))
+
+        block = pygame.Surface((drawsize, drawsize))
+        block.fill((0, 0, 0))
+        block.blit(bar_health, (0, 0))
+        block.blit(bar_energy, (0, drawsize/3))
+        block.blit(bar_gest, (0, 2*drawsize/3))
+        return block

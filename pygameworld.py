@@ -8,12 +8,11 @@ class PyGameWorld(object):
     def __init__(self, world):
         pygame.init()
 
-        (self.width, self.height) = (DRAW_FACTOR * world.xsize, DRAW_FACTOR * world.ysize)
+        (self.width, self.height) = (DRAW_FACTOR * world.xsize + 30, DRAW_FACTOR * world.ysize + 30)
         self.size = (self.width, self.height)
         self.bg = (100, 100, 100)
 
         self.screen = pygame.display.set_mode(self.size)
-
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -22,10 +21,20 @@ class PyGameWorld(object):
 
     def draw(self, world):
         self.screen.fill(self.bg)
-        red_block = pygame.Surface((DRAW_FACTOR, DRAW_FACTOR))
-        red_block.fill((200, 0, 0))
         for p in world.pets:
-            self.screen.blit(red_block, [DRAW_FACTOR * el for el in p.get_pos()])
+            self.screen.blit(p.graphic(DRAW_FACTOR), [DRAW_FACTOR * el for el in p.get_pos()])
+        # Update stats at bottom of screen
+
+        string = "t: " + str(world.time) +\
+                    " pets: " + str(len(world.pets)) +\
+                    " avg a: " + str(world.average_age()) +\
+                    " avg e: " + str(world.average_energy()) +\
+                    " avg h: " + str(world.average_health())
+        font = pygame.font.Font(None, 25)
+        text = font.render(string, 1, (255, 255, 255 ))
+        
+        self.screen.blit(text, (5, DRAW_FACTOR * world.ysize))
+
         pygame.display.flip()
 
 

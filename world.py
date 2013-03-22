@@ -1,5 +1,6 @@
 import random
 from time import sleep
+from copy import deepcopy
 
 from utilities import *
 from settings import *
@@ -16,9 +17,9 @@ class World(object):
         self.time = 0
 
         # Generate an initial set of resources
-        self.wood = [[random.randint(0, MAX_WOOD) for x in range(xsize)] for y in range(ysize)]
-        self.stone = [[random.randint(0, MAX_STONE) for x in range(xsize)] for y in range(ysize)]
-        self.fruit = [[random.randint(0, MAX_FRUIT) for x in range(xsize)] for y in range(ysize)]
+        self.wood = [[random.random() * MAX_WOOD for x in range(xsize)] for y in range(ysize)]
+        self.stone = [[random.random() * MAX_STONE for x in range(xsize)] for y in range(ysize)]
+        self.fruit = [[random.random() * MAX_FRUIT for x in range(xsize)] for y in range(ysize)]
 
     
     def step(self):
@@ -34,8 +35,13 @@ class World(object):
 
         # Trigger a step in each of the pets
         # TODO iterate over randomized self.pets
+        newpets = []
         for p in self.pets:
             p.step(self.callback)
+            if p.health > 0 and p.energy > 0:
+                newpets.append(deepcopy(p))
+        
+        self.pets = newpets
 
         self.time += 1
 
@@ -59,6 +65,7 @@ class World(object):
             attack_strength = pet.get_attack()
             for p in self.neighbors(pet_position):
                 p.defend(attack_strength)
+                pet.do_attack()
 
         # Move
         elif action == "MoveUp":
@@ -83,7 +90,7 @@ class World(object):
                         p.write_reproduction(pet.mate(free_spaces))
 
         elif action == "OffspringReady":
-            self.new_pet(pet)
+            return self.new_pet(pet)
 
     def neighbors(self, position):
         return [n for n in self.pets if are_neighbors(n.get_pos(), position)]
@@ -95,34 +102,61 @@ class World(object):
 
     # Check if there are resources available at a position
     def has_wood(self, position):
-        return self.wood[position[0]][position[1]]
+        return self.wood[position[0]][position[1]] > 0
 
     def has_stone(self, position):
-        return self.stone[position[0]][position[1]]
+        return self.stone[position[0]][position[1]] > 0
 
     def has_fruit(self, position):
-        return self.fruit[position[0]][position[1]]
+        return self.fruit[position[0]][position[1]] > 0
 
     # Detract resources when they are gathered
     def detract_wood(self, position, amount):
-        self.wood[position[0]][position[1]] -= amount
+        self.wood[position[0]][position[1]] = max(self.wood[position[0]][position[1]] - amount, 0)
 
     def detract_stone(self, position, amount):
-        self.stone[position[0]][position[1]] -= amount
+        self.stone[position[0]][position[1]] = max(self.stone[position[0]][position[1]] - amount, 0)
 
     def detract_fruit(self, position, amount):
-        self.fruit[position[0]][position[1]] -= amount
+        self.fruit[position[0]][position[1]] = max(self.fruit[position[0]][position[1]] - amount, 0)
 
     def new_pet(self, parent):
-        self.pets.append(Pet(
-                parent.posx,
-                parent.posy,
-                parent.reproduction,
-                parent.defense * random.uniform(0.8, 1.2),
-                parent.speed * random.uniform(0.8, 1.2),
-                parent.attack * random.uniform(0.8, 1.2),
-                parent.gather * random.uniform(0.8, 1.2)
-            ))
+        possible_new_pos = [pos for pos in [
+                        (parent.posx + 1, parent.posy),
+                        (parent.posx - 1, parent.posy),
+                        (parent.posx, parent.posy + 1),
+                        (parent.posx, parent.posy - 1)
+                    ] if self.possible_target_position(pos)]
+        
+        if possible_new_pos != []:
+            actual_new_pos = random.choice(possible_new_pos)
+            self.pets.append(Pet(
+                    actual_new_pos[0],
+                    actual_new_pos[1],
+                    parent.reproduction,
+                    parent.defense * random.uniform(0.8, 1.2),
+                    parent.speed * random.uniform(0.8, 1.2),
+                    parent.attack * random.uniform(0.8, 1.2),
+                    parent.gather * random.uniform(0.8, 1.2)
+                ))
+            return True
+        return False
+
+    def average_age(self):
+        ages = [p.age for p in self.pets]
+        return round(float(sum(ages))/len(ages), 1)
+
+    def average_energy(self):
+        energies = [p.energy for p in self.pets]
+        return round(float(sum(energies))/len(energies), 1)
+
+    def average_health(self):
+        healths = [p.health for p in self.pets]
+        return round(float(sum(healths))/len(healths), 1)
+
+
+    def oldest(self):
+        return max([p.age for p in self.pets])
 
     def ascii_map(self):
         res = ""
@@ -152,8 +186,8 @@ if __name__=="__main__":
         random.shuffle(lst)
         return lst
 
-    pets = [Pet(x*3, x*3, shuffled_instructions(), 1, 1, 1, 1) for x in range(5)]
-    w = World(20, 20, pets)
+    pets = [Pet(x*3, x*3, shuffled_instructions(), 0.1, 1, 0.1, 1) for x in range(5)]
+    w = World(30, 30, pets)
     
     w.create_canvas()
 
@@ -161,6 +195,8 @@ if __name__=="__main__":
         w.step()
         w.update_canvas()
         w.handle_events()
-        sleep(0.1)
+        print("wood " + str(sum([sum(x) for x in w.wood])) +\
+            " stone " + str(sum([sum(x) for x in w.stone])) +\
+            " fruit " + str(sum([sum(x) for x in w.fruit])))
 
     print w.ascii_map()
